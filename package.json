@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db:docker": "docker run --name test_db -p 15432:5432 -e POSTGRES_PASSWORD=pass123 -e POSTGRES_USER=doron -e POSTGRES_DB=test_db -v /Users/doronsegal/github/posrgres-table-partitioning/.data:/var/lib/postgresql/data -d postgres:9.6"
+    "migrate": "POSTGRES_URL=postgres://doron:pass123@localhost:15432/test_db ./node_modules/.bin/knex migrate:latest",
+    "db:docker": "docker run --name test_db -p 15432:5432 -e POSTGRES_PASSWORD=pass123 -e POSTGRES_USER=doron -e POSTGRES_DB=dock -v ~/github/posrgres-table-partitioning/.data:/var/lib/postgresql/data -d postgres:9.6"
   },
   "repository": {
     "type": "git",
