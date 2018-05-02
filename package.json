@@ -1,0 +1,24 @@
+{
+  "name": "posrgres-table-partitioning",
+  "version": "1.0.0",
+  "description": "Postgresql Table Partitioning",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:docker": "docker run --name test_db -p 15432:5432 -e POSTGRES_PASSWORD=pass123 -e POSTGRES_USER=doron -e POSTGRES_DB=test_db -v /Users/doronsegal/github/posrgres-table-partitioning/.data:/var/lib/postgresql/data -d postgres:9.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doron2402/posrgres-table-partitioning.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/doron2402/posrgres-table-partitioning/issues"
+  },
+  "homepage": "https://github.com/doron2402/posrgres-table-partitioning#readme",
+  "dependencies": {
+    "knex": "^0.14.6",
+    "pg": "^7.4.1"
+  }
+}
