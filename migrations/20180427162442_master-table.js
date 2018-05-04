@@ -1,8 +1,10 @@
 'use strict';
 
 const MASTER_TABLE = 'timeseries_master';
-const SRC_ID_STARTS_AT = 1;
-const SRC_ID_ENDS_AT = 100;
+const SRC_ID_STARTS_AT = 1000;
+const SRC_ID_ENDS_AT = 1015;
+const START_YEAR = 2016;
+const END_YEAR = 2020;
 
 /**
  * This will allow us to to have smaller indexes
@@ -18,17 +20,27 @@ exports.up = function(knex, Promise) {
     if (!exists) {
       return knex.schema.withSchema('public').createTable(MASTER_TABLE, (table) => {
         table.specificType('src_id', 'serial');
-        table.timestamp('timestamp');
+        table.timestamp('ts', true).notNullable();
+        table.string('type');
         table.jsonb('body').comment('body JSON');
-        table.timestamp('received_at').defaultTo(knex.fn.now());
         table.timestamp('created_at').defaultTo(knex.fn.now());
       })
       .then((res) => {
-        promises = [];
-        for (let index = DRONE_ID_STARTS_AT; index < DRONE_ID_ENDS_AT; index++) {
-          const tableName = `timeseries_child_${index}`;
-          promises.push(knex.raw(`CREATE TABLE ${tableName} (CHECK (src_id = ${index})) INHERITS (${MASTER_TABLE})`));
-        }
+        const promises = [];
+        for (let index = SRC_ID_STARTS_AT; index < SRC_ID_ENDS_AT; index++) {
+          for (let year = START_YEAR; year < END_YEAR; year++) {
+            const tableName = `timeseries_child_${index}_${year}`;
+            const sqlQuery = `CREATE TABLE ${tableName} (
+              CHECK (
+                src_id = ${parseInt(index)}
+                AND ts >= timestamp '${year}-01-01'
+                AND ts < timestamp '${(year+1)}-01-01'
+              )
+            )
+            INHERITS (${MASTER_TABLE});`;
+            promises.push(knex.raw(sqlQuery));
+          }// eo for by year
+        } // eo for by src_id
         return Promise.all(promises)
         .then((res) => {
           console.log(res);
@@ -50,9 +62,13 @@ exports.down = function(knex, Promise) {
     knex.schema.dropTable('timeseries_master')
   ]).then((res) => {
     const promises = [];
-    for (let index = DRONE_ID_STARTS_AT; index < DRONE_ID_ENDS_AT; index++) {
-      promises.push(knex.schema.dropTable(`timeseries_child_${index}`));
-    }
+    for (let index = SRC_ID_STARTS_AT; index < SRC_ID_ENDS_AT; index++) {
+      for (let year = START_YEAR; year < END_YEAR; year++) {
+        const tableName = `timeseries_child_${index}_${year}`;
+        promises.push(knex.schema.dropTable(tableName));
+      }// eo for by year
+    } // eo for by src_id
+
     return Promise.all(promises)
     .then((res) => {
       console.log(res);
